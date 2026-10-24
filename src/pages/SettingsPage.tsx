@@ -43,8 +43,6 @@ export default function SettingsPage() {
 
   return (
     <section>
-      <h1>Settings</h1>
-
       <div className="card">
         <h2>Backup</h2>
         <p className="muted">Export all data as a JSON file, or merge a backup back in (newer entries win).</p>
@@ -61,7 +59,6 @@ export default function SettingsPage() {
         </div>
         {msg && <p className="note">{msg}</p>}
       </div>
-
       <div className="card">
         <h2>Storage</h2>
         <p className="muted">
@@ -84,7 +81,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="card muted">
-        <h2>Sync</h2>
+        <h2>Uplink</h2>
         <p>Upload / load via GitHub (encrypted) comes in phase 4.</p>
       </div>
     </section>

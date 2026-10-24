@@ -18,7 +18,7 @@ export default function TodayPage() {
 
   return (
     <section>
-      <h1>{pretty}</h1>
+      <div className="eyebrow">{pretty}</div>
       <div className="grid">
         <Tile label="Journal" value={counts?.journal} />
         <Tile label="Workouts" value={counts?.workouts} />

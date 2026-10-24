@@ -3,7 +3,6 @@ import Placeholder from './Placeholder'
 export default function TrackerPage() {
   return (
     <Placeholder
-      title="Tracker"
       phase="phase 2"
       items={[
         'Sport: log workouts, weekly goal',

@@ -3,7 +3,6 @@ import Placeholder from './Placeholder'
 export default function SuggestionsPage() {
   return (
     <Placeholder
-      title="For you"
       phase="phase 3"
       items={[
         'Rule-based nudges (no sport in 3 days, neglected hobby, ...)',
