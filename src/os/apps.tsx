@@ -23,9 +23,9 @@ export interface AppDef {
 }
 
 export const APPS = {
-  status: { title: 'STATUS // sitrep', label: 'status', glyph: '◉', size: [640, 420], component: TodayPage },
-  journal: { title: 'JOURNAL // field log', label: 'journal', glyph: '✎', size: [720, 560], component: JournalPage },
-  tracker: { title: 'TRACKER // ops', label: 'tracker', glyph: '▦', size: [760, 560], component: TrackerPage },
+  status: { title: 'STATUS // sitrep', label: 'status', glyph: '◉', size: [680, 600], component: TodayPage },
+  journal: { title: 'JOURNAL // field log', label: 'journal', glyph: '✎', size: [820, 600], component: JournalPage },
+  tracker: { title: 'TRACKER // ops', label: 'tracker', glyph: '▦', size: [780, 640], component: TrackerPage },
   intel: { title: 'INTEL // briefings', label: 'intel', glyph: '◈', size: [680, 500], component: SuggestionsPage },
   analytics: { title: 'ANALYTICS // telemetry', label: 'analytics', glyph: '▤', size: [760, 520], component: StatsPage },
   term: { title: 'TERMINAL // tty1', label: 'term', glyph: '>_', size: [680, 420], component: Terminal },

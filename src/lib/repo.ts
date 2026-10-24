@@ -1,4 +1,4 @@
-import { db, type BaseRecord, type SyncedTable } from './db'
+import { db, type BaseRecord, type Goal, type GoalArea, type HabitCheck, type SyncedTable } from './db'
 
 type NewRecord<T extends BaseRecord> = Omit<T, keyof BaseRecord> & Partial<Pick<T, 'id'>>
 
@@ -30,4 +30,67 @@ export function toDateStr(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
+}
+
+export function parseDate(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+export function addDays(date: string, n: number): string {
+  const d = parseDate(date)
+  d.setDate(d.getDate() + n)
+  return toDateStr(d)
+}
+
+/** Monday of the week containing `date`. */
+export function weekStart(date = today()): string {
+  const d = parseDate(date)
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+  return toDateStr(d)
+}
+
+/** Whole days from `a` to `b` (b - a). */
+export function daysBetween(a: string, b: string): number {
+  return Math.round((parseDate(b).getTime() - parseDate(a).getTime()) / 86_400_000)
+}
+
+export function parseTags(s: string): string[] {
+  return [...new Set(s.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean))]
+}
+
+/** Set the weekly target for an area, reusing the existing goal record. */
+export async function setGoal(area: GoalArea, perWeek: number) {
+  const existing = (await db.goals.where('area').equals(area).toArray()).find((g) => !g.deleted)
+  if (existing) await update<Goal>('goals', existing.id, { perWeek })
+  else await create<Goal>('goals', { area, perWeek })
+}
+
+/**
+ * Check or uncheck a habit for a day. Runs in one transaction so rapid clicks
+ * can't create duplicates; reuses tombstoned rows so ids stay stable across devices.
+ */
+export async function toggleHabit(habitId: string, date: string) {
+  await db.transaction('rw', db.habitChecks, async () => {
+    const rows = await db.habitChecks.where('[habitId+date]').equals([habitId, date]).toArray()
+    const live = rows.filter((r) => !r.deleted)
+    if (live.length) {
+      for (const r of live) await remove('habitChecks', r.id)
+    } else if (rows[0]) {
+      await update<HabitCheck>('habitChecks', rows[0].id, { deleted: false })
+    } else {
+      await create<HabitCheck>('habitChecks', { habitId, date })
+    }
+  })
+}
+
+/** Consecutive checked days ending today (or yesterday, if today isn't checked yet). */
+export function streak(habitId: string, done: Set<string>, t: string): number {
+  let d = done.has(`${habitId}|${t}`) ? t : addDays(t, -1)
+  let n = 0
+  while (done.has(`${habitId}|${d}`)) {
+    n++
+    d = addDays(d, -1)
+  }
+  return n
 }
