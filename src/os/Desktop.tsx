@@ -6,6 +6,7 @@ import Window from './Window'
 import Boot from './Boot'
 import { db, getDeviceId } from '../lib/db'
 import { today } from '../lib/repo'
+import { ago, startSync, useSyncState, useUplink } from '../lib/sync'
 
 function useMobile() {
   const q = '(max-width: 700px)'
@@ -143,7 +144,7 @@ function Taskbar({ mobile, startOpen, toggleStart }: { mobile: boolean; startOpe
                 ))}
             </div>
             <div className="tray">
-              <span className="tray-item warn" title="Sync not set up yet (phase 4)">⇅ OFFLINE</span>
+              <SyncTray />
               <span className="tray-item" title="Local storage">⛁ LOCAL</span>
               <span className="clock">
                 {now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: mobile ? undefined : '2-digit' })}
@@ -156,6 +157,7 @@ function Taskbar({ mobile, startOpen, toggleStart }: { mobile: boolean; startOpe
 /** Conky-style widget on the desktop: node info and today's counts. */
 function SysMonitor() {
   const date = today()
+  const uplink = useUplink()
   const [node, setNode] = useState<string>()
   useEffect(() => {
     getDeviceId().then((id) => setNode(id.slice(0, 8)))
@@ -185,8 +187,8 @@ function SysMonitor() {
       {row('node', node)}
       {row('date', date)}
       {row('store', 'indexeddb')}
-      {row('uplink', 'offline', 'warn')}
-      {row('crypto', 'pending', 'dim')}
+      {row('uplink', uplink?.config ? (uplink.last ? ago(uplink.last.at) : 'never') : 'offline', uplink?.config ? '' : 'warn')}
+      {row('crypto', uplink?.config ? 'aes-256-gcm' : 'idle', 'dim')}
       <div className="mon-head">TODAY</div>
       {row('journal', info?.journal)}
       {row('workouts', info?.workouts)}
@@ -203,3 +205,34 @@ const LOGO = String.raw`
 | |___ | ||  _| | |___ / /  | |_| |___) |
 |_____|___|_|   |_____/_/    \___/|____/
 `
+
+/** Tray sync indicator; click to sync (or open SYSTEM if not configured). */
+function SyncTray() {
+  const { open } = useWm()
+  const uplink = useUplink()
+  const sync = useSyncState()
+  const [, tick] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => tick((n) => n + 1), 30_000)
+    return () => clearInterval(t)
+  }, [])
+
+  if (!uplink?.config) {
+    return (
+      <button className="tray-btn tray-item warn" title="Set up sync in SYSTEM" onClick={() => open('system')}>
+        ⇅ OFFLINE
+      </button>
+    )
+  }
+  const label = sync.running ? `⇅ ${sync.step.toUpperCase()}…` : sync.error ? '⇅ SYNC FAILED' : `⇅ ${uplink.last ? ago(uplink.last.at) : 'never'}`
+  return (
+    <button
+      className={`tray-btn tray-item ${sync.error ? 'err' : 'ok'}`}
+      title={sync.error ?? 'Sync now'}
+      disabled={sync.running}
+      onClick={() => startSync().catch(() => undefined)}
+    >
+      {label}
+    </button>
+  )
+}

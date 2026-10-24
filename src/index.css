@@ -513,3 +513,17 @@ form.inline button { padding: 2px 8px; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--accent-dim); }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* uplink */
+a { color: var(--accent); }
+.note.err, .err { color: var(--red); }
+.kv { border-collapse: collapse; font-size: 0.8rem; margin-bottom: 10px; }
+.kv td { padding: 1px 1.5rem 1px 0; }
+.kv td:first-child { color: var(--dim); }
+.steps { padding-left: 1.2rem; margin: 0 0 12px; color: var(--dim); }
+.steps li { margin-bottom: 4px; }
+.steps b { color: var(--text); font-weight: normal; }
+.tray-btn { background: none; border: none; padding: 0; height: auto !important; font-size: 0.72rem !important; text-transform: none; letter-spacing: 0; }
+.tray-btn:hover { box-shadow: none; text-decoration: underline dotted; }
+.tray-item.ok { color: var(--accent); }
+.tray-item.err { color: var(--red); }

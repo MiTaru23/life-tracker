@@ -6,7 +6,7 @@ const LINES: [string, string][] = [
   ['OK', 'mounting encrypted volume /dev/lifedb'],
   ['OK', 'loading modules: journal tracker intel analytics'],
   ['OK', 'starting window manager'],
-  ['WARN', 'uplink offline · running in local mode'],
+  ['OK', 'uplink module loaded · vault AES-256-GCM'],
   ['OK', 'operator session established'],
   ['', '> welcome back, operator.'],
 ]

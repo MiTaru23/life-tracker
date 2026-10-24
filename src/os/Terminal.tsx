@@ -4,6 +4,7 @@ import { useWm } from './wm'
 import { db, getDeviceId, SYNCED_TABLES } from '../lib/db'
 import { downloadJson, exportSnapshot } from '../lib/snapshot'
 import { today } from '../lib/repo'
+import { describeSync, startSync } from '../lib/sync'
 
 type Line = { kind: 'in' | 'out' | 'err'; text: string }
 
@@ -14,7 +15,8 @@ const HELP = `available commands:
   ls                list installed apps
   open <app>        launch an app (e.g. open journal)
   stats             record counts per table
-  export            download an encrypted... ok, a JSON backup
+  sync              pull + push the encrypted vault
+  export            download a JSON backup
   whoami            operator identity
   neofetch          system info
   date | uptime     time
@@ -62,6 +64,14 @@ export default function Terminal({ close }: AppProps) {
         }
         return print(rows.join('\n'))
       }
+      case 'sync': {
+        print('[ .. ] establishing uplink')
+        try {
+          return print(`[ OK ] ${describeSync(await startSync())}`)
+        } catch (e) {
+          return print(`[FAIL] ${(e as Error).message}`, 'err')
+        }
+      }
       case 'export':
         downloadJson(await exportSnapshot(), `life-backup-${today()}.json`)
         return print('[ OK ] backup written to downloads')
@@ -82,8 +92,8 @@ export default function Terminal({ close }: AppProps) {
    ██║     Kernel: 6.6.6-opsec
    ███████ Shell:  lsh 1.0
    ╚═════╝ Store:  IndexedDB (local)
-           Uplink: offline
-           Crypto: AES-256-GCM (pending)`,
+           Uplink: github vault
+           Crypto: AES-256-GCM`,
         )
       }
       case 'sudo':
