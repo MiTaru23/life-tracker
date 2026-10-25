@@ -111,6 +111,9 @@ export interface Suggestion extends BaseRecord {
   body: string
   source: 'rule' | 'ai'
   feedback?: 'up' | 'down'
+  dismissed?: boolean
+  /** For AI suggestions: which week they summarise, e.g. "2026-10-19". */
+  week?: DateStr
 }
 
 /** Local-only key/value store (device id, last sync time, ...). Not synced. */

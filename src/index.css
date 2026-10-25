@@ -569,3 +569,22 @@ a { color: var(--accent); }
 .bw-now .dim { font-size: 1rem; }
 .spark { color: var(--accent); opacity: 0.8; }
 .ok { color: var(--accent); }
+
+/* ---------- intel (recommendations) ---------- */
+.intel { border-left: 2px solid var(--accent-dim); }
+.intel-head { display: flex; align-items: center; gap: 8px; }
+.intel-glyph { color: var(--accent); width: 1.2em; text-align: center; }
+.intel-body { margin: 6px 0 10px; color: var(--text); font-size: 0.85rem; }
+.intel-foot { display: flex; gap: 8px; }
+.vote {
+  background: transparent;
+  border: 1px solid var(--line-hi);
+  color: var(--dim);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.72rem;
+  padding: 0.3rem 0.6rem;
+}
+.vote:hover { border-color: var(--accent-dim); color: var(--text); box-shadow: none; }
+.vote.on { border-color: var(--accent); color: var(--accent); background: rgb(57 255 136 / 0.08); }
+.vote.on.down { border-color: var(--red); color: var(--red); background: rgb(255 84 104 / 0.08); }

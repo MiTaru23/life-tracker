@@ -1,4 +1,4 @@
-import { db, type BaseRecord, type Goal, type GoalArea, type HabitCheck, type SyncedTable } from './db'
+import { db, type BaseRecord, type Goal, type GoalArea, type HabitCheck, type Suggestion, type SyncedTable } from './db'
 
 type NewRecord<T extends BaseRecord> = Omit<T, keyof BaseRecord> & Partial<Pick<T, 'id'>>
 
@@ -93,4 +93,28 @@ export function streak(habitId: string, done: Set<string>, t: string): number {
     d = addDays(d, -1)
   }
   return n
+}
+
+/**
+ * Persist feedback or dismissal for a suggestion. For rule-generated hits this
+ * materialises the hit into the `suggestions` table (keyed by its stable id) so
+ * the state syncs across devices; createdAt is preserved on update.
+ */
+export async function setSuggestionState(
+  hit: { id: string; area: Suggestion['area']; title: string; body: string; source?: Suggestion['source'] },
+  patch: { feedback?: 'up' | 'down'; dismissed?: boolean },
+) {
+  const existing = await db.suggestions.get(hit.id)
+  await db.suggestions.put({
+    id: hit.id,
+    area: hit.area,
+    title: hit.title,
+    body: hit.body,
+    source: existing?.source ?? hit.source ?? 'rule',
+    week: existing?.week,
+    createdAt: existing?.createdAt ?? Date.now(),
+    updatedAt: Date.now(),
+    feedback: 'feedback' in patch ? patch.feedback : existing?.feedback,
+    dismissed: 'dismissed' in patch ? patch.dismissed : existing?.dismissed,
+  })
 }
