@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { APPS, APP_IDS, type AppId, type AppProps } from './apps'
 import { useWm } from './wm'
 import { db, getDeviceId, SYNCED_TABLES } from '../lib/db'
@@ -6,9 +6,9 @@ import { downloadJson, exportSnapshot } from '../lib/snapshot'
 import { today } from '../lib/repo'
 import { describeSync, startSync } from '../lib/sync'
 import { computeStats, statsLines } from '../lib/stats'
-import { AVATAR, AVATAR_WIDTH } from '../lib/avatar'
+import { AVATAR_LEVELS, AVATAR_PIXELS } from '../lib/avatar'
 
-type Line = { kind: 'in' | 'out' | 'err'; text: string }
+type Line = { kind: 'in' | 'out' | 'err'; text: string; node?: ReactNode }
 
 const BOOTED = Date.now()
 
@@ -87,13 +87,8 @@ export default function Terminal({ close }: AppProps) {
       }
       case 'neofetch': {
         const info = statsLines(await computeStats())
-        const rows = Math.max(AVATAR.length, info.length)
-        const lines: string[] = []
-        for (let i = 0; i < rows; i++) {
-          const art = (AVATAR[i] ?? '').padEnd(AVATAR_WIDTH)
-          lines.push(`${art}  ${info[i] ?? ''}`)
-        }
-        return print(lines.join('\n'))
+        setLines((l) => [...l, { kind: 'out', text: '', node: <Neofetch info={info} /> }])
+        return
       }
       case 'sudo':
         return print('operator is not in the sudoers file. this incident will be reported.', 'err')
@@ -125,11 +120,15 @@ export default function Terminal({ close }: AppProps) {
 
   return (
     <div className="term" onClick={() => inputRef.current?.focus()}>
-      {lines.map((l, i) => (
-        <pre key={i} className={`term-${l.kind}`}>
-          {l.kind === 'in' ? `$ ${l.text}` : l.text}
-        </pre>
-      ))}
+      {lines.map((l, i) =>
+        l.node ? (
+          <div key={i}>{l.node}</div>
+        ) : (
+          <pre key={i} className={`term-${l.kind}`}>
+            {l.kind === 'in' ? `$ ${l.text}` : l.text}
+          </pre>
+        ),
+      )}
       <div className="term-prompt">
         <span>$</span>
         <input
@@ -145,6 +144,29 @@ export default function Terminal({ close }: AppProps) {
         />
       </div>
       <div ref={endRef} />
+    </div>
+  )
+}
+
+/** neofetch body: shaded green pixel avatar (real tonal steps) beside the stats. */
+function Neofetch({ info }: { info: string[] }) {
+  const cols = AVATAR_PIXELS[0]?.length ?? 0
+  return (
+    <div className="neofetch">
+      <div
+        className="avatar"
+        role="img"
+        aria-label="operator avatar"
+        style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+      >
+        {AVATAR_PIXELS.flatMap((row, y) =>
+          row.map((v, x) => (
+            // opacity carries the shade; 0 = background, max = brightest.
+            <span key={`${y}-${x}`} style={{ opacity: v / (AVATAR_LEVELS - 1) }} />
+          )),
+        )}
+      </div>
+      <pre className="neofetch-info">{info.join('\n')}</pre>
     </div>
   )
 }
