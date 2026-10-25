@@ -5,6 +5,8 @@ import { db, getDeviceId, SYNCED_TABLES } from '../lib/db'
 import { downloadJson, exportSnapshot } from '../lib/snapshot'
 import { today } from '../lib/repo'
 import { describeSync, startSync } from '../lib/sync'
+import { computeStats, statsLines } from '../lib/stats'
+import { AVATAR, AVATAR_WIDTH } from '../lib/avatar'
 
 type Line = { kind: 'in' | 'out' | 'err'; text: string }
 
@@ -84,17 +86,14 @@ export default function Terminal({ close }: AppProps) {
         return print(`up ${Math.floor(m / 60)}h ${m % 60}m`)
       }
       case 'neofetch': {
-        const node = (await getDeviceId()).slice(0, 8)
-        return print(
-          `   ██╗     operator@node-${node}
-   ██║     ---------------------
-   ██║     OS:     LIFE/OS v0.2.0
-   ██║     Kernel: 6.6.6-opsec
-   ███████ Shell:  lsh 1.0
-   ╚═════╝ Store:  IndexedDB (local)
-           Uplink: github vault
-           Crypto: AES-256-GCM`,
-        )
+        const info = statsLines(await computeStats())
+        const rows = Math.max(AVATAR.length, info.length)
+        const lines: string[] = []
+        for (let i = 0; i < rows; i++) {
+          const art = (AVATAR[i] ?? '').padEnd(AVATAR_WIDTH)
+          lines.push(`${art}  ${info[i] ?? ''}`)
+        }
+        return print(lines.join('\n'))
       }
       case 'sudo':
         return print('operator is not in the sudoers file. this incident will be reported.', 'err')

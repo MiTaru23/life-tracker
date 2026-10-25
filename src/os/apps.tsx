@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import TodayPage from '../pages/TodayPage'
 import JournalPage from '../pages/JournalPage'
 import TrackerPage from '../pages/TrackerPage'
+import TasksPage from '../pages/TasksPage'
 import SuggestionsPage from '../pages/SuggestionsPage'
 import StatsPage from '../pages/StatsPage'
 import SettingsPage from '../pages/SettingsPage'
@@ -26,6 +27,7 @@ export const APPS = {
   status: { title: 'STATUS // sitrep', label: 'status', glyph: '◉', size: [680, 600], component: TodayPage },
   journal: { title: 'JOURNAL // field log', label: 'journal', glyph: '✎', size: [820, 600], component: JournalPage },
   tracker: { title: 'TRACKER // ops', label: 'tracker', glyph: '▦', size: [780, 640], component: TrackerPage },
+  tasks: { title: 'TASKS // queue', label: 'tasks', glyph: '☑', size: [620, 560], component: TasksPage },
   intel: { title: 'INTEL // briefings', label: 'intel', glyph: '◈', size: [680, 500], component: SuggestionsPage },
   analytics: { title: 'ANALYTICS // telemetry', label: 'analytics', glyph: '▤', size: [760, 520], component: StatsPage },
   term: { title: 'TERMINAL // tty1', label: 'term', glyph: '>_', size: [680, 420], component: Terminal },

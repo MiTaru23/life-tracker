@@ -116,6 +116,15 @@ export interface Suggestion extends BaseRecord {
   week?: DateStr
 }
 
+export interface Task extends BaseRecord {
+  text: string
+  done: boolean
+  doneAt?: number
+  /** 0 = normal, 1 = starred/important. */
+  priority?: number
+  due?: DateStr
+}
+
 /** Local-only key/value store (device id, last sync time, ...). Not synced. */
 export interface Meta {
   key: string
@@ -133,6 +142,7 @@ export const SYNCED_TABLES = [
   'goals',
   'suggestions',
   'bodyweights',
+  'tasks',
 ] as const
 export type SyncedTable = (typeof SYNCED_TABLES)[number]
 
@@ -147,6 +157,7 @@ export const db = new Dexie('life-tracker') as Dexie & {
   goals: EntityTable<Goal, 'id'>
   suggestions: EntityTable<Suggestion, 'id'>
   bodyweights: EntityTable<Bodyweight, 'id'>
+  tasks: EntityTable<Task, 'id'>
   meta: EntityTable<Meta, 'key'>
 }
 
@@ -167,6 +178,11 @@ db.version(1).stores({
 db.version(2).stores({
   workouts: 'id, date, type, externalId, updatedAt',
   bodyweights: 'id, date, updatedAt',
+})
+
+// v3: todo list.
+db.version(3).stores({
+  tasks: 'id, done, updatedAt',
 })
 
 export async function getDeviceId(): Promise<string> {
