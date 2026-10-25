@@ -4,6 +4,8 @@ import JournalPage from '../pages/JournalPage'
 import TrackerPage from '../pages/TrackerPage'
 import TasksPage from '../pages/TasksPage'
 import SuggestionsPage from '../pages/SuggestionsPage'
+import ReportPage from '../pages/ReportPage'
+import ChatPage from '../pages/ChatPage'
 import StatsPage from '../pages/StatsPage'
 import SettingsPage from '../pages/SettingsPage'
 import Terminal from './Terminal'
@@ -29,6 +31,8 @@ export const APPS = {
   tracker: { title: 'TRACKER // ops', label: 'tracker', glyph: '▦', size: [780, 640], component: TrackerPage },
   tasks: { title: 'TASKS // queue', label: 'tasks', glyph: '☑', size: [620, 560], component: TasksPage },
   intel: { title: 'INTEL // briefings', label: 'intel', glyph: '◈', size: [680, 500], component: SuggestionsPage },
+  report: { title: 'REPORT // weekly', label: 'report', glyph: '≣', size: [680, 560], component: ReportPage },
+  chat: { title: 'CHAT // claude', label: 'chat', glyph: '✦', size: [620, 560], component: ChatPage },
   analytics: { title: 'ANALYTICS // telemetry', label: 'analytics', glyph: '▤', size: [760, 520], component: StatsPage },
   term: { title: 'TERMINAL // tty1', label: 'term', glyph: '>_', size: [680, 420], component: Terminal },
   system: { title: 'SYSTEM // config', label: 'system', glyph: '⚙', size: [640, 600], component: SettingsPage },

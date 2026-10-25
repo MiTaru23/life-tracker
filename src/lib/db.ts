@@ -125,6 +125,16 @@ export interface Task extends BaseRecord {
   due?: DateStr
 }
 
+/** One message in the Claude chat. Synced, so a conversation spans devices. */
+export interface ChatMessage extends BaseRecord {
+  role: 'user' | 'assistant'
+  text: string
+  /** user messages: true until a reply has been produced (live or on the PC). */
+  pending?: boolean
+  /** how the reply was produced */
+  via?: 'live' | 'uplink'
+}
+
 /** Local-only key/value store (device id, last sync time, ...). Not synced. */
 export interface Meta {
   key: string
@@ -143,6 +153,7 @@ export const SYNCED_TABLES = [
   'suggestions',
   'bodyweights',
   'tasks',
+  'chat',
 ] as const
 export type SyncedTable = (typeof SYNCED_TABLES)[number]
 
@@ -158,6 +169,7 @@ export const db = new Dexie('life-tracker') as Dexie & {
   suggestions: EntityTable<Suggestion, 'id'>
   bodyweights: EntityTable<Bodyweight, 'id'>
   tasks: EntityTable<Task, 'id'>
+  chat: EntityTable<ChatMessage, 'id'>
   meta: EntityTable<Meta, 'key'>
 }
 
@@ -183,6 +195,11 @@ db.version(2).stores({
 // v3: todo list.
 db.version(3).stores({
   tasks: 'id, done, updatedAt',
+})
+
+// v4: Claude chat.
+db.version(4).stores({
+  chat: 'id, createdAt, updatedAt',
 })
 
 export async function getDeviceId(): Promise<string> {
