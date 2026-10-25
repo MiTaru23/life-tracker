@@ -1,9 +1,20 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import type { Habit, HabitCheck, Hobby, LearningItem, LearningKind, LearningStatus, Session, Workout } from '../lib/db'
+import type {
+  Bodyweight,
+  ExerciseSet,
+  Habit,
+  HabitCheck,
+  Hobby,
+  LearningItem,
+  LearningKind,
+  LearningStatus,
+  Session,
+  Workout,
+} from '../lib/db'
 import { useAlive } from '../lib/hooks'
 import { addDays, create, daysBetween, remove, streak, toggleHabit, today, update, weekStart } from '../lib/repo'
 import { fmtDate, fmtMin } from '../lib/format'
-import { Empty, GoalMeter, Scale, Tabs } from '../ui'
+import { Empty, GoalMeter, Scale, Sparkline, Tabs } from '../ui'
 
 const TABS = ['sport', 'knowledge', 'hobbies', 'habits'] as const
 type Tab = (typeof TABS)[number]
@@ -105,27 +116,119 @@ function Sport() {
         </div>
       </form>
 
+      <BodyweightPanel />
+
       <div className="card">
         <h2>history</h2>
         {workouts && !sorted.length && <Empty>no workouts logged</Empty>}
-        <table className="tbl">
-          <tbody>
-            {sorted.slice(0, 40).map((w) => (
-              <tr key={w.id}>
-                <td className="dim">{fmtDate(w.date)}</td>
-                <td>{w.type}</td>
-                <td className="r">{fmtMin(w.durationMin)}</td>
-                <td className="dim">{w.intensity ? '▮'.repeat(w.intensity) : ''}</td>
-                <td className="dim ellipsis">{w.notes}</td>
-                <td className="r">
-                  <button className="x" onClick={() => remove('workouts', w.id)} aria-label="Delete workout">×</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ul className="wlist">
+          {sorted.slice(0, 60).map((w) => (
+            <WorkoutRow key={w.id} w={w} />
+          ))}
+        </ul>
       </div>
     </>
+  )
+}
+
+/** One workout: compact line, expandable to exercises + sets for imported gym sessions. */
+function WorkoutRow({ w }: { w: Workout }) {
+  const [open, setOpen] = useState(false)
+  const hasDetail = !!w.exercises?.length
+  return (
+    <li className="witem">
+      <div className="wrow">
+        <button
+          className={`wmain${hasDetail ? ' expandable' : ''}`}
+          onClick={() => hasDetail && setOpen((o) => !o)}
+          aria-expanded={hasDetail ? open : undefined}
+        >
+          <span className="dim wdate">{fmtDate(w.date)}</span>
+          {hasDetail && <span className="caret">{open ? '▾' : '▸'}</span>}
+          <span className="wtype grow">
+            {w.type}
+            {w.source === 'liftoff' && <span className="src">liftoff</span>}
+          </span>
+          {w.prCount ? <span className="pr">★{w.prCount} PR</span> : null}
+          {w.intensity ? <span className="dim">{'▮'.repeat(w.intensity)}</span> : null}
+          <span className="dim r wdur">{fmtMin(w.durationMin)}</span>
+        </button>
+        <button className="x" onClick={() => confirm('Delete this workout?') && remove('workouts', w.id)} aria-label="Delete workout">×</button>
+      </div>
+      {!hasDetail && w.notes && <div className="wnote dim">{w.notes}</div>}
+      {open && hasDetail && (
+        <div className="wdetail">
+          {w.notes && <div className="wnote dim">{w.notes}</div>}
+          {w.exercises!.map((ex, i) => (
+            <div className="exrow" key={i}>
+              <div className="exname">
+                {ex.name}
+                {ex.notes && <span className="dim exnote"> — {ex.notes}</span>}
+              </div>
+              <div className="sets">
+                {ex.sets.map((s, j) => (
+                  <span key={j} className={`set${s.warmup ? ' warm' : ''}`}>{fmtSet(s)}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </li>
+  )
+}
+
+function fmtSet(s: ExerciseSet): string {
+  if (s.seconds) return s.seconds >= 60 ? `${Math.floor(s.seconds / 60)}:${String(s.seconds % 60).padStart(2, '0')}` : `${s.seconds}s`
+  if (s.weightKg && s.reps != null) return `${s.weightKg}×${s.reps}`
+  if (s.weightKg) return `${s.weightKg}kg`
+  if (s.reps != null) return `×${s.reps}`
+  return '—'
+}
+
+/** Bodyweight: latest value, 30-day trend, sparkline, manual entry. */
+function BodyweightPanel() {
+  const rows = useAlive<Bodyweight>('bodyweights')
+  const [kg, setKg] = useState('')
+  const sorted = useMemo(() => [...(rows ?? [])].sort((a, b) => a.date.localeCompare(b.date)), [rows])
+  if (!rows) return null
+
+  const latest = sorted[sorted.length - 1]
+  const monthAgo = addDays(today(), -30)
+  const prior = [...sorted].reverse().find((r) => r.date <= monthAgo)
+  const delta = latest && prior ? Math.round((latest.kg - prior.kg) * 10) / 10 : undefined
+
+  async function add(e: FormEvent) {
+    e.preventDefault()
+    const v = Number(kg)
+    if (!(v > 0)) return
+    const d = today()
+    // One record per day; overwrite if present (same id scheme as imports).
+    await create<Bodyweight>('bodyweights', { id: `bw-${d}`, date: d, kg: Math.round(v * 10) / 10 })
+    setKg('')
+  }
+
+  return (
+    <div className="card">
+      <h2>bodyweight</h2>
+      {latest ? (
+        <div className="bw">
+          <span className="bw-now">{latest.kg}<span className="dim"> kg</span></span>
+          {delta !== undefined && (
+            <span className={delta > 0 ? 'warn' : delta < 0 ? 'ok' : 'dim'}>
+              {delta > 0 ? '▲' : delta < 0 ? '▼' : '='} {Math.abs(delta)} kg / 30d
+            </span>
+          )}
+          <Sparkline values={sorted.slice(-60).map((r) => r.kg)} />
+        </div>
+      ) : (
+        <Empty>no bodyweight logged — import from Liftoff or add below</Empty>
+      )}
+      <form className="form-row log" onSubmit={add}>
+        <input type="number" step="0.1" min={1} placeholder="kg today" value={kg} onChange={(e) => setKg(e.target.value)} className="num" aria-label="Bodyweight kg" />
+        <button className="secondary">+ log</button>
+      </form>
+    </div>
   )
 }
 

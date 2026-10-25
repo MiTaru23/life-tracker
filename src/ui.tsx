@@ -90,3 +90,18 @@ export function GoalMeter({ area, value, label }: { area: GoalArea; value: numbe
 export function Empty({ children }: { children: ReactNode }) {
   return <p className="empty">{children}</p>
 }
+
+/** Tiny inline trend line. Scales to its own min/max; flat if all equal. */
+export function Sparkline({ values, width = 120, height = 28 }: { values: number[]; width?: number; height?: number }) {
+  if (values.length < 2) return null
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const span = max - min || 1
+  const step = width / (values.length - 1)
+  const pts = values.map((v, i) => `${(i * step).toFixed(1)},${(height - ((v - min) / span) * (height - 4) - 2).toFixed(1)}`)
+  return (
+    <svg className="spark" width={width} height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden>
+      <polyline points={pts.join(' ')} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  )
+}

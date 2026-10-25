@@ -527,3 +527,45 @@ a { color: var(--accent); }
 .tray-btn:hover { box-shadow: none; text-decoration: underline dotted; }
 .tray-item.ok { color: var(--accent); }
 .tray-item.err { color: var(--red); }
+
+/* ---------- gym detail (liftoff) ---------- */
+.wlist { list-style: none; margin: 0; padding: 0; }
+.witem { border-bottom: 1px dashed var(--line); }
+.wrow { display: flex; align-items: center; gap: 4px; }
+.wmain {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+  text-align: left;
+  padding: 6px 4px;
+  min-width: 0;
+}
+.wmain.expandable { cursor: pointer; }
+.wmain.expandable:hover { background: rgb(57 255 136 / 0.05); box-shadow: none; }
+.wmain:not(.expandable) { cursor: default; }
+.caret { color: var(--accent); width: 0.9em; }
+.wdate { width: 5.5em; flex-shrink: 0; font-size: 0.8rem; }
+.wtype { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.src { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); border: 1px solid var(--line-hi); padding: 0 4px; margin-left: 6px; }
+.pr { color: var(--amber); font-size: 0.75rem; white-space: nowrap; }
+.wdur { width: 4.5em; flex-shrink: 0; font-size: 0.8rem; }
+.wnote { font-size: 0.75rem; padding: 0 4px 6px 4px; }
+.wdetail { padding: 2px 4px 10px 1.5em; }
+.exrow { margin: 6px 0; }
+.exname { font-size: 0.82rem; }
+.exnote { font-size: 0.75rem; }
+.sets { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 3px; }
+.set { font-size: 0.75rem; color: var(--accent); border: 1px solid var(--line-hi); padding: 0 5px; border-radius: 2px; font-variant-numeric: tabular-nums; }
+.set.warm { color: var(--dim); opacity: 0.8; }
+
+.bw { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.bw-now { font-size: 1.8rem; color: var(--accent); text-shadow: var(--glow); }
+.bw-now .dim { font-size: 1rem; }
+.spark { color: var(--accent); opacity: 0.8; }
+.ok { color: var(--accent); }

@@ -23,12 +23,42 @@ export interface JournalEntry extends BaseRecord {
   tags: string[]
 }
 
+/** One set within an exercise. Fields used depend on the exercise kind. */
+export interface ExerciseSet {
+  weightKg?: number
+  reps?: number
+  seconds?: number // for timed holds (e.g. plank, dead hang)
+  warmup?: boolean
+}
+
+export interface Exercise {
+  name: string
+  externalId?: string // e.g. Liftoff exerciseId
+  notes?: string
+  sets: ExerciseSet[]
+}
+
 export interface Workout extends BaseRecord {
   date: DateStr
   type: string // e.g. "Running", "Gym", "Climbing"
   durationMin: number
   intensity?: number // 1-5
   notes?: string
+  /** Where this record came from. Absent = manually logged. */
+  source?: 'liftoff'
+  /** Stable id from the source app, so re-imports update instead of duplicating. */
+  externalId?: string
+  /** Per-exercise detail (strength training). Absent for simple cardio logs. */
+  exercises?: Exercise[]
+  /** Number of personal records hit in this session (from the source app). */
+  prCount?: number
+}
+
+/** A bodyweight measurement. */
+export interface Bodyweight extends BaseRecord {
+  date: DateStr
+  kg: number
+  source?: 'liftoff'
 }
 
 export type LearningKind = 'book' | 'course' | 'topic' | 'video' | 'other'
@@ -99,6 +129,7 @@ export const SYNCED_TABLES = [
   'habitChecks',
   'goals',
   'suggestions',
+  'bodyweights',
 ] as const
 export type SyncedTable = (typeof SYNCED_TABLES)[number]
 
@@ -112,6 +143,7 @@ export const db = new Dexie('life-tracker') as Dexie & {
   habitChecks: EntityTable<HabitCheck, 'id'>
   goals: EntityTable<Goal, 'id'>
   suggestions: EntityTable<Suggestion, 'id'>
+  bodyweights: EntityTable<Bodyweight, 'id'>
   meta: EntityTable<Meta, 'key'>
 }
 
@@ -126,6 +158,12 @@ db.version(1).stores({
   goals: 'id, area, updatedAt',
   suggestions: 'id, area, updatedAt',
   meta: 'key',
+})
+
+// v2: strength-training detail on workouts + bodyweight log (Liftoff import).
+db.version(2).stores({
+  workouts: 'id, date, type, externalId, updatedAt',
+  bodyweights: 'id, date, updatedAt',
 })
 
 export async function getDeviceId(): Promise<string> {
