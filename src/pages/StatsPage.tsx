@@ -50,9 +50,6 @@ export default function StatsPage() {
     )
   }
 
-  const moodData = w.map((b) => ({ label: b.label, value: b.avgMood ?? 0 })).filter((_, i) => w[i].avgMood != null)
-  const energyData = w.map((b) => ({ label: b.label, value: b.avgEnergy ?? 0 })).filter((_, i) => w[i].avgEnergy != null)
-
   return (
     <section className="stats">
       <div className="eyebrow">last {w.length} weeks</div>
@@ -67,16 +64,16 @@ export default function StatsPage() {
         </div>
       )}
 
-      {moodData.length >= 2 && (
+      {a.moodDaily.length >= 2 && (
         <div className="card">
-          <h2>mood / week</h2>
-          <Line data={moodData} unit="/10" max={10} />
+          <h2>mood · daily</h2>
+          <Line data={a.moodDaily} unit="/10" max={10} dp={0} />
         </div>
       )}
-      {energyData.length >= 2 && (
+      {a.energyDaily.length >= 2 && (
         <div className="card">
-          <h2>energy / week</h2>
-          <Line data={energyData} unit="/10" max={10} />
+          <h2>energy · daily</h2>
+          <Line data={a.energyDaily} unit="/10" max={10} dp={0} />
         </div>
       )}
 

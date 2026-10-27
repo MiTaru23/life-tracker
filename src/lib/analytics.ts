@@ -22,6 +22,9 @@ export interface Point {
 export interface Analytics {
   weeks: WeekBucket[]
   bodyweight: Point[]
+  /** Daily mood/energy (last ~60 days), one point per logged day. */
+  moodDaily: Point[]
+  energyDaily: Point[]
   moodOnTraining?: number
   moodOffTraining?: number
   moodSampleOn: number
@@ -99,9 +102,21 @@ export function computeAnalytics(
     .slice(-90)
     .map((r) => ({ label: fmtLabel(r.date), value: r.kg, date: r.date }))
 
+  // Daily mood/energy over the last 60 days (one point per logged day).
+  const from60 = addDays(today(), -60)
+  const recent = journal.filter((e) => e.date >= from60).sort((a, b) => a.date.localeCompare(b.date))
+  const moodDaily: Point[] = recent
+    .filter((e) => typeof e.mood === 'number')
+    .map((e) => ({ label: fmtLabel(e.date), value: e.mood as number, date: e.date }))
+  const energyDaily: Point[] = recent
+    .filter((e) => typeof e.energy === 'number')
+    .map((e) => ({ label: fmtLabel(e.date), value: e.energy as number, date: e.date }))
+
   return {
     weeks,
     bodyweight,
+    moodDaily,
+    energyDaily,
     moodOnTraining: avg(on),
     moodOffTraining: avg(off),
     moodSampleOn: on.length,
