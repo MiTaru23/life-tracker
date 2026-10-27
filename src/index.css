@@ -652,3 +652,26 @@ a { color: var(--accent); }
 .msg:hover .msg-del { opacity: 1; }
 .chat-input { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); margin-top: 8px; }
 .chat-input input { flex: 1; }
+
+/* ---------- analytics charts ---------- */
+.stats .card h2 { margin-bottom: 6px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart .grid { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.chart .axis { stroke: var(--line-hi); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.chart .bar { fill: var(--accent-dim); }
+.chart .bar.on { fill: var(--accent); }
+.chart .line { stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.chart .dot { fill: var(--accent); }
+.chart .dot.on { fill: var(--text); }
+.chart-readout { font-size: 0.72rem; color: var(--accent); height: 1.1em; font-variant-numeric: tabular-nums; }
+.chart-xlabels { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--dim); margin-top: 2px; }
+.chart-empty { color: var(--dim); font-size: 0.78rem; padding: 10px 0; }
+
+.cmp { display: flex; flex-direction: column; gap: 8px; }
+.cmp-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+.cmp-label { width: 8.5em; color: var(--dim); flex-shrink: 0; }
+.cmp-track { flex: 1; height: 16px; background: var(--bg); border: 1px solid var(--line); }
+.cmp-fill { height: 100%; }
+.cmp-fill.up { background: var(--accent); }
+.cmp-fill.dim { background: var(--accent-dim); }
+.cmp-val { width: 4.5em; text-align: right; color: var(--accent); font-variant-numeric: tabular-nums; }
