@@ -7,6 +7,7 @@ import SuggestionsPage from '../pages/SuggestionsPage'
 import ReportPage from '../pages/ReportPage'
 import ChatPage from '../pages/ChatPage'
 import StatsPage from '../pages/StatsPage'
+import FinancePage from '../pages/FinancePage'
 import SettingsPage from '../pages/SettingsPage'
 import Terminal from './Terminal'
 
@@ -34,6 +35,7 @@ export const APPS = {
   report: { title: 'REPORT // weekly', label: 'report', glyph: '≣', size: [680, 560], component: ReportPage },
   chat: { title: 'CHAT // claude', label: 'chat', glyph: '✦', size: [620, 560], component: ChatPage },
   analytics: { title: 'ANALYTICS // telemetry', label: 'analytics', glyph: '▤', size: [760, 520], component: StatsPage },
+  finance: { title: 'FINANCE // ledger', label: 'finance', glyph: '€', size: [700, 600], component: FinancePage },
   term: { title: 'TERMINAL // tty1', label: 'term', glyph: '>_', size: [680, 420], component: Terminal },
   system: { title: 'SYSTEM // config', label: 'system', glyph: '⚙', size: [640, 600], component: SettingsPage },
 } satisfies Record<string, AppDef>

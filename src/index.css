@@ -675,3 +675,24 @@ a { color: var(--accent); }
 .cmp-fill.up { background: var(--accent); }
 .cmp-fill.dim { background: var(--accent-dim); }
 .cmp-val { width: 4.5em; text-align: right; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+/* ---------- finance ---------- */
+.month-nav { align-items: center; }
+.month-label { flex: 1; text-align: center; color: var(--accent); font-size: 0.9rem; }
+.fin-grid { grid-template-columns: repeat(3, 1fr); }
+.tile-value.ok { color: var(--accent); }
+.tile-value.bad { color: var(--red); }
+.tile-value.warn { color: var(--amber); }
+td.ok { color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--line-hi); margin-bottom: 10px; }
+.seg button { background: transparent; border: none; color: var(--dim); border-radius: 0; padding: 0.4rem 0.9rem; }
+.seg button:hover { box-shadow: none; color: var(--text); }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.goal-track { height: 14px; margin-top: 4px; }
+
+.catlist { display: flex; flex-direction: column; gap: 6px; }
+.cat-row { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }
+.cat-name { width: 7.5em; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-track { flex: 1; height: 14px; background: var(--bg); border: 1px solid var(--line); }
+.cat-fill { height: 100%; background: var(--accent-dim); }
+.cat-amt { width: 6em; text-align: right; color: var(--accent); font-variant-numeric: tabular-nums; }

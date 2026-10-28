@@ -135,6 +135,25 @@ export interface ChatMessage extends BaseRecord {
   via?: 'live' | 'uplink'
 }
 
+export type TxType = 'in' | 'out'
+
+/** One income or expense entry. `amount` is always positive; `type` gives direction. */
+export interface Transaction extends BaseRecord {
+  date: DateStr
+  amount: number // in currency units (e.g. euros), positive
+  type: TxType
+  category: string
+  note?: string
+}
+
+/** A named savings target the user contributes toward. */
+export interface SavingsGoal extends BaseRecord {
+  name: string
+  target: number
+  saved: number
+  archived?: boolean
+}
+
 /** Local-only key/value store (device id, last sync time, ...). Not synced. */
 export interface Meta {
   key: string
@@ -154,6 +173,8 @@ export const SYNCED_TABLES = [
   'bodyweights',
   'tasks',
   'chat',
+  'transactions',
+  'savingsGoals',
 ] as const
 export type SyncedTable = (typeof SYNCED_TABLES)[number]
 
@@ -170,6 +191,8 @@ export const db = new Dexie('life-tracker') as Dexie & {
   bodyweights: EntityTable<Bodyweight, 'id'>
   tasks: EntityTable<Task, 'id'>
   chat: EntityTable<ChatMessage, 'id'>
+  transactions: EntityTable<Transaction, 'id'>
+  savingsGoals: EntityTable<SavingsGoal, 'id'>
   meta: EntityTable<Meta, 'key'>
 }
 
@@ -200,6 +223,12 @@ db.version(3).stores({
 // v4: Claude chat.
 db.version(4).stores({
   chat: 'id, createdAt, updatedAt',
+})
+
+// v5: money management.
+db.version(5).stores({
+  transactions: 'id, date, type, category, updatedAt',
+  savingsGoals: 'id, updatedAt',
 })
 
 export async function getDeviceId(): Promise<string> {
