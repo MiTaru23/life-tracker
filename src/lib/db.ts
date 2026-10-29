@@ -154,6 +154,24 @@ export interface SavingsGoal extends BaseRecord {
   archived?: boolean
 }
 
+/** Monthly spending limit for an expense category. */
+export interface Budget extends BaseRecord {
+  category: string
+  limit: number
+}
+
+/** A transaction that repeats every month (rent, subscriptions, salary). */
+export interface Recurring extends BaseRecord {
+  type: TxType
+  amount: number
+  category: string
+  note?: string
+  dayOfMonth: number // 1-28
+  /** "YYYY-MM" of the last month a transaction was generated for this rule. */
+  lastApplied?: string
+  active: boolean
+}
+
 /** Local-only key/value store (device id, last sync time, ...). Not synced. */
 export interface Meta {
   key: string
@@ -175,6 +193,8 @@ export const SYNCED_TABLES = [
   'chat',
   'transactions',
   'savingsGoals',
+  'budgets',
+  'recurring',
 ] as const
 export type SyncedTable = (typeof SYNCED_TABLES)[number]
 
@@ -193,6 +213,8 @@ export const db = new Dexie('life-tracker') as Dexie & {
   chat: EntityTable<ChatMessage, 'id'>
   transactions: EntityTable<Transaction, 'id'>
   savingsGoals: EntityTable<SavingsGoal, 'id'>
+  budgets: EntityTable<Budget, 'id'>
+  recurring: EntityTable<Recurring, 'id'>
   meta: EntityTable<Meta, 'key'>
 }
 
@@ -229,6 +251,12 @@ db.version(4).stores({
 db.version(5).stores({
   transactions: 'id, date, type, category, updatedAt',
   savingsGoals: 'id, updatedAt',
+})
+
+// v6: budgets + recurring transactions.
+db.version(6).stores({
+  budgets: 'id, category, updatedAt',
+  recurring: 'id, updatedAt',
 })
 
 export async function getDeviceId(): Promise<string> {

@@ -1,5 +1,5 @@
-import type { Transaction } from './db'
-import { today } from './repo'
+import { db, type Transaction } from './db'
+import { create, today } from './repo'
 
 export const CURRENCY = 'EUR'
 const nf = new Intl.NumberFormat('de-DE', { style: 'currency', currency: CURRENCY, maximumFractionDigits: 2 })
@@ -49,3 +49,53 @@ export function summarizeMonth(txs: Transaction[], month: string): MonthSummary 
 /** Default category suggestions (editable; past categories get merged in). */
 export const DEFAULT_EXPENSE_CATS = ['Food', 'Groceries', 'Rent', 'Transport', 'Fun', 'Shopping', 'Health', 'Subscriptions', 'Other']
 export const DEFAULT_INCOME_CATS = ['Salary', 'Allowance', 'Gift', 'Refund', 'Other']
+
+/* ---------- recurring transactions ---------- */
+
+function daysInMonth(key: string): number {
+  const [y, m] = key.split('-').map(Number)
+  return new Date(y, m, 0).getDate()
+}
+
+function monthOfMs(ms: number): string {
+  const d = new Date(ms)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+/**
+ * Generate transactions for every recurring rule that is due and not yet
+ * applied. Stable ids (`rec-<ruleId>-<YYYY-MM>`) keep it idempotent across
+ * devices and reloads; a deleted generated entry is not resurrected.
+ */
+export async function applyDueRecurring(): Promise<number> {
+  const recs = (await db.recurring.toArray()).filter((r) => !r.deleted && r.active)
+  if (!recs.length) return 0
+  const cur = thisMonth()
+  const curDay = Number(today().slice(8, 10))
+  let made = 0
+  for (const r of recs) {
+    const start = r.lastApplied ? shiftMonth(r.lastApplied, 1) : monthOfMs(r.createdAt)
+    let last = r.lastApplied
+    for (let m = start; m <= cur; m = shiftMonth(m, 1)) {
+      if (m === cur && curDay < r.dayOfMonth) break
+      const day = Math.min(r.dayOfMonth, daysInMonth(m))
+      const id = `rec-${r.id}-${m}`
+      if (!(await db.transactions.get(id))) {
+        await create<Transaction>('transactions', {
+          id,
+          date: `${m}-${String(day).padStart(2, '0')}`,
+          amount: r.amount,
+          type: r.type,
+          category: r.category,
+          note: r.note,
+        })
+        made++
+      }
+      last = m
+    }
+    if (last && last !== r.lastApplied) {
+      await db.recurring.update(r.id, { lastApplied: last, updatedAt: Date.now() })
+    }
+  }
+  return made
+}

@@ -696,3 +696,9 @@ td.ok { color: var(--accent); }
 .cat-track { flex: 1; height: 14px; background: var(--bg); border: 1px solid var(--line); }
 .cat-fill { height: 100%; background: var(--accent-dim); }
 .cat-amt { width: 6em; text-align: right; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.cat-fill.near { background: var(--amber); }
+.cat-fill.over { background: var(--red); }
+.cat-amt.bad { color: var(--red); }
+.row-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+.editing-row { outline: 1px dashed var(--accent-dim); }
