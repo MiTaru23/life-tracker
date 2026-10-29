@@ -36,14 +36,32 @@ export interface MonthSummary {
   byCategory: { category: string; amount: number }[]
 }
 
-export function summarizeMonth(txs: Transaction[], month: string): MonthSummary {
-  const live = txs.filter((t) => !t.deleted && monthOf(t.date) === month)
+export const MAIN = 'main'
+
+/** The space a transaction belongs to; absent counts as the default "main". */
+export function accountOf(t: Transaction): string {
+  return t.account || MAIN
+}
+
+/** Summarise one month. With `accountId`, only that space; transfers never count as income/expense. */
+export function summarizeMonth(txs: Transaction[], month: string, accountId?: string): MonthSummary {
+  const live = txs.filter(
+    (t) => !t.deleted && !t.transfer && monthOf(t.date) === month && (!accountId || accountOf(t) === accountId),
+  )
   const income = live.filter((t) => t.type === 'in').reduce((a, t) => a + t.amount, 0)
   const expense = live.filter((t) => t.type === 'out').reduce((a, t) => a + t.amount, 0)
   const cat = new Map<string, number>()
   for (const t of live.filter((t) => t.type === 'out')) cat.set(t.category, (cat.get(t.category) ?? 0) + t.amount)
   const byCategory = [...cat.entries()].map(([category, amount]) => ({ category, amount })).sort((a, b) => b.amount - a.amount)
   return { income, expense, net: income - expense, byCategory }
+}
+
+/** All-time balance of a space (every in minus out, transfers and corrections included). */
+export function balanceOf(txs: Transaction[], accountId?: string): number {
+  const bal = txs
+    .filter((t) => !t.deleted && (!accountId || accountOf(t) === accountId))
+    .reduce((a, t) => a + (t.type === 'in' ? t.amount : -t.amount), 0)
+  return Math.round(bal * 100) / 100
 }
 
 /** Default category suggestions (editable; past categories get merged in). */
@@ -98,4 +116,29 @@ export async function applyDueRecurring(): Promise<number> {
     }
   }
   return made
+}
+
+/* ---------- spaces: transfers + balance correction ---------- */
+
+/** Move money between two spaces as a paired transfer (not counted as income/expense). */
+export async function transferBetween(fromId: string, toId: string, amount: number, fromName: string, toName: string, note?: string) {
+  const d = today()
+  const n = Math.round(amount * 100) / 100
+  if (!(n > 0) || fromId === toId) return
+  await create<Transaction>('transactions', { account: fromId, date: d, amount: n, type: 'out', category: `→ ${toName}`, transfer: true, note })
+  await create<Transaction>('transactions', { account: toId, date: d, amount: n, type: 'in', category: `← ${fromName}`, transfer: true, note })
+}
+
+/** Book the difference so the space's balance matches the real-world amount. */
+export async function correctBalance(accountId: string, actual: number, current: number) {
+  const diff = Math.round((actual - current) * 100) / 100
+  if (!diff) return
+  await create<Transaction>('transactions', {
+    account: accountId,
+    date: today(),
+    amount: Math.abs(diff),
+    type: diff > 0 ? 'in' : 'out',
+    category: 'Correction',
+    note: 'balance correction',
+  })
 }

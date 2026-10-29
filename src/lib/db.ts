@@ -144,6 +144,17 @@ export interface Transaction extends BaseRecord {
   type: TxType
   category: string
   note?: string
+  /** Which space/account this belongs to. Absent/'main' = the default account. */
+  account?: string
+  /** True for the two legs of a transfer between spaces (excluded from income/expense totals). */
+  transfer?: boolean
+}
+
+/** A money space / sub-account (e.g. Main, Savings, Cash). */
+export interface Account extends BaseRecord {
+  name: string
+  order?: number
+  archived?: boolean
 }
 
 /** A named savings target the user contributes toward. */
@@ -195,6 +206,7 @@ export const SYNCED_TABLES = [
   'savingsGoals',
   'budgets',
   'recurring',
+  'accounts',
 ] as const
 export type SyncedTable = (typeof SYNCED_TABLES)[number]
 
@@ -215,6 +227,7 @@ export const db = new Dexie('life-tracker') as Dexie & {
   savingsGoals: EntityTable<SavingsGoal, 'id'>
   budgets: EntityTable<Budget, 'id'>
   recurring: EntityTable<Recurring, 'id'>
+  accounts: EntityTable<Account, 'id'>
   meta: EntityTable<Meta, 'key'>
 }
 
@@ -257,6 +270,12 @@ db.version(5).stores({
 db.version(6).stores({
   budgets: 'id, category, updatedAt',
   recurring: 'id, updatedAt',
+})
+
+// v7: money spaces / sub-accounts.
+db.version(7).stores({
+  transactions: 'id, date, type, category, account, updatedAt',
+  accounts: 'id, updatedAt',
 })
 
 export async function getDeviceId(): Promise<string> {

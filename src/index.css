@@ -702,3 +702,11 @@ td.ok { color: var(--accent); }
 .cat-amt.bad { color: var(--red); }
 .row-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
 .editing-row { outline: 1px dashed var(--accent-dim); }
+
+.fin-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.fin-controls .month-nav { flex: 1; margin-bottom: 0; }
+.space-pick { min-width: 8em; }
+.balance-card { border-left: 2px solid var(--accent); }
+.balance-val { font-size: 1.9rem; font-variant-numeric: tabular-nums; text-shadow: var(--glow); }
+.balance-val.ok { color: var(--accent); }
+.balance-val.bad { color: var(--red); }
