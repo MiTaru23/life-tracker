@@ -213,7 +213,7 @@ function RecurringTab({ txs }: { txs?: Transaction[] }) {
   async function add(e: FormEvent) {
     e.preventDefault()
     const amt = parseAmount(amount)
-    const d = Math.max(1, Math.min(28, Math.round(Number(day))))
+    const d = Math.max(1, Math.min(31, Math.round(Number(day))))
     if (!(amt > 0) || !category.trim()) return
     await create<Recurring>('recurring', { type, amount: amt, category: category.trim(), note: note.trim() || undefined, dayOfMonth: d, active: true })
     setAmount('')
@@ -233,7 +233,7 @@ function RecurringTab({ txs }: { txs?: Transaction[] }) {
         <div className="form-row">
           <label className="field"><span>amount €</span><input inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} required className="num" /></label>
           <label className="field grow"><span>category</span><input list="rec-cats" value={category} onChange={(e) => setCategory(e.target.value)} required /><datalist id="rec-cats">{cats.map((c) => <option key={c} value={c} />)}</datalist></label>
-          <label className="field"><span>day of month</span><input type="number" min={1} max={28} value={day} onChange={(e) => setDay(e.target.value)} className="num" /></label>
+          <label className="field"><span>day of month</span><input type="number" min={1} max={31} value={day} onChange={(e) => setDay(e.target.value)} className="num" /></label>
         </div>
         <div className="form-row">
           <input className="grow" placeholder="note (optional)" value={note} onChange={(e) => setNote(e.target.value)} aria-label="Note" />
